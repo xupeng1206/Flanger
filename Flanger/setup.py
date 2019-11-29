@@ -13,7 +13,6 @@ setup(
     url='None',
     install_requires=[
         'Flask>=1.1.1',
-        'Flask-RESTful>=0.3.7',
         'Flask-SQLAlchemy>=2.4.1',
     ]
 )

@@ -1,5 +1,5 @@
 from flask import Flask, request
-from .restful.middleware import BaseMiddleWare
+from .restful.middleware import BaseAppMiddleWare
 
 
 class FlangerApp(Flask):
@@ -13,5 +13,4 @@ class FlangerApp(Flask):
         pass
 
     def bind_middleware(self):
-        req = request
-        BaseMiddleWare().process_request(req)
+        BaseAppMiddleWare().process_request(request)
