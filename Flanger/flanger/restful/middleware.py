@@ -1,39 +1,25 @@
 from .urls import FlangerUrls
-import threading
+from .utils import Singleton
+from .response import FlangerResponse
+import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def lock(func):
-    func.__lock__ = threading.Lock()
-
-    def wrapper(*args, **kwargs):
-        with func.__lock__:
-            return func(*args, **kwargs)
-
-    return wrapper
-
-
-def Singleton(cls):
-    __instances = {}
-
-    @lock
-    def wrapper(*args, **kw):
-        if cls not in __instances:
-            __instances[cls] = cls(*args, **kw)
-        return __instances[cls]
-
-    return wrapper
-
-
+@Singleton
 class BaseMiddleWare:
 
-    def __init__(self, *args, **kwargs):
-        self.pure_urls = FlangerUrls.pure_urls
-        self.regular_urls = FlangerUrls.pure_urls
-
-        for sub_clz in FlangerUrls.__subclasses__():
-            self.pure_urls.update(sub_clz().pure_urls)
-            self.regular_urls.update(sub_clz().regular_urls)
+    endpoint_resource = {}
 
     def process_request(self, request, *args, **kwargs):
-        a = 1
-        pass
+        url_rule = request.url_rule
+        if not url_rule:
+            error_msg = f'{url_rule.string} Not Found!!!'
+            logging.info(error_msg)
+            return FlangerResponse.error(404, error_msg)
+        try:
+            resource = self.endpoint_resource[url_rule.endpoint]
+        except Exception as e:
+            return
+

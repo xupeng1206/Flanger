@@ -13,4 +13,6 @@ flanger/db/models/base.py
 flanger/restful/__init__.py
 flanger/restful/middleware.py
 flanger/restful/resource.py
+flanger/restful/response.py
 flanger/restful/urls.py
+flanger/restful/utils.py
