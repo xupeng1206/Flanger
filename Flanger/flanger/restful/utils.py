@@ -1,4 +1,5 @@
 import threading
+import importlib
 
 
 def lock(func):
@@ -23,4 +24,14 @@ def Singleton(cls):
     return wrapper
 
 
-__all__ = ['Singleton']
+def extract_clz_from_string(module_str):
+    file_module_str = '.'.join(module_str.split('.')[:-1])
+    clz_str = module_str.split('.')[-1]
+    module = module_str.import_module(file_module_str)
+    clz = getattr(module, clz_str, None)
+    if clz is None:
+        raise Exception(f'{module_str} class not Found !!!')
+    return clz
+
+
+__all__ = ['Singleton', 'extract_clz_from_string']

@@ -1,11 +1,8 @@
 from .resource import HelloResource
-from flanger.restful.urls import FlangerUrls
 
 
-class V1Urls(FlangerUrls):
+class V1Urls:
     urls = {
         '/hello': HelloResource
     }
 
-
-__all__ = ['V1Urls']

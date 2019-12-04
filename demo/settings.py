@@ -3,7 +3,9 @@ import sys
 
 # BASE_DIR =
 
-URLS = [
-    'api.v1.urls',
-    'api.v2.urls'
+FLANGER_URLS = [
+    'api.v1.urls.V1Urls',
+    'api.v2.urls.V2Urls',
 ]
+
+FLANGER_MIDDLEWARES = ['flanger.restful.middleware.MiddleWareMin']
