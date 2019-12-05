@@ -1,5 +1,5 @@
 from .response import FlangerResponse
-from .exceptions import FlangerError, UrlNotFound, ApiNotImplement
+from .exceptions import FlangerError, UrlNotFound, MethodNotImplement
 from .utils import extract_params
 import logging
 
@@ -26,7 +26,7 @@ class BaseRequestProcessor:
             request_method = request.method.lower()
             method = getattr(resource, request_method, None)
             if method is None:
-                raise ApiNotImplement
+                raise MethodNotImplement
 
             params = {}
             ret_params = extract_params(request)

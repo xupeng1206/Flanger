@@ -34,7 +34,7 @@ class FlangerApp(Flask):
                     clz = extract_clz_from_string(urls)
                     for url, resource in clz.urls.items():
                         ep = f'{clz.__module__}.{clz.__name__}.{resource.__name__}'
-                        self.add_url_rule(url, endpoint=ep)
+                        self.add_url_rule(url, endpoint=ep, methods=['GET', 'POST', 'PUT', 'DELETE'])
                         self.endpoint_resource[ep] = resource()
             else:
                 raise Exception('FLANGER_URLS must be list !!!')

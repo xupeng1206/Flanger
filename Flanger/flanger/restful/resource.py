@@ -1,16 +1,18 @@
+from flanger.restful.exceptions import MethodNotImplement
+
 class BaseResource:
 
     def get(self, *args, **kwargs):
-        raise NotImplementedError
+        raise MethodNotImplement
 
     def post(self, *args, **kwargs):
-        raise NotImplementedError
+        raise MethodNotImplement
 
     def put(self, *args, **kwargs):
-        raise NotImplementedError
+        raise MethodNotImplement
 
     def delete(self, *args, **kwargs):
-        raise NotImplementedError
+        raise MethodNotImplement
 
 class SwaggerResource:
 

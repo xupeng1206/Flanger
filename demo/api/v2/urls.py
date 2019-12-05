@@ -3,7 +3,8 @@ from .resource import HelloResource
 
 class V2Urls(FlangerUrls):
     urls = {
-        '/': HelloResource
+        '/': HelloResource,
+        '/hello/<abc>': HelloResource
     }
 
 

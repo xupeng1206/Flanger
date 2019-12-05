@@ -8,7 +8,7 @@ class UrlNotFound(FlangerError):
     msg = 'Url Not Found !!!'
 
 
-class ApiNotImplement(FlangerError):
+class MethodNotImplement(FlangerError):
     code = 1002
     msg = 'Api Not Implement !!!'
 
