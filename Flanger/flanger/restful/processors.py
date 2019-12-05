@@ -1,5 +1,6 @@
 from .response import FlangerResponse
 from .exceptions import FlangerError, UrlNotFound, ApiNotImplement
+from .utils import extract_params
 import logging
 
 logger = logging.getLogger(__name__)
@@ -12,9 +13,6 @@ class BaseRequestProcessor:
     def __init__(self, resources, *args, **kwargs):
         self.endpoint_resource = resources
 
-    def extract_params(self, request):
-        return {}
-
     def process_request(self, request, *args, **kwargs):
         try:
             url_rule = request.url_rule
@@ -25,19 +23,27 @@ class BaseRequestProcessor:
             if resource is None:
                 raise UrlNotFound
 
-            request_method = request.method.low()
+            request_method = request.method.lower()
             method = getattr(resource, request_method, None)
             if method is None:
                 raise ApiNotImplement
 
             params = {}
-            ret_params = self.extract_params(request)
+            ret_params = extract_params(request)
             if isinstance(ret_params, dict):
                 params.update(ret_params)
 
             data = method(**params)
-            return FlangerResponse.success(data)
+            return FlangerResponse.success(data if not data is None else {})
 
         except FlangerError as e:
             logger.error(e.msg)
             return FlangerResponse.error(e.code, e.msg)
+        except Exception as e:
+            raise e
+
+
+class BaseResponseProcessor:
+
+    def process_response(self, response):
+        return response
