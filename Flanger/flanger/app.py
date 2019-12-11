@@ -2,6 +2,7 @@ from flask import Flask, request
 from .restful.processors import BaseRequestProcessor
 from .restful.urls import FlangerUrls
 from .restful.utils import extract_clz_from_string
+from flanger.db.models.base import db
 
 
 class FlangerApp(Flask):
@@ -20,7 +21,7 @@ class FlangerApp(Flask):
         self.before_request(self.bind_processor)
 
     def init_db(self):
-        pass
+        db.create_all(app=self)
 
     def init_urls(self):
         for url, resource in FlangerUrls.urls.items():
