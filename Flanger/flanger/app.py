@@ -2,11 +2,13 @@ from flask import Flask, request
 from .restful.processors import BaseRequestProcessor
 from .restful.urls import FlangerUrls
 from .restful.utils import extract_clz_from_string
+from .restful.swagger import generate_swagger_json
 from flanger.db.models.base import db
 
 
 class FlangerApp(Flask):
     endpoint_resource = {}
+    endpoint_url = {}
     request_processors = []
     response_processors = []
 
@@ -16,6 +18,7 @@ class FlangerApp(Flask):
     def init(self):
         self.init_db()
         self.init_urls()
+        self.init_swagger()
         self.init_request_processors()
         self.init_response_processors()
         self.before_request(self.bind_processor)
@@ -33,12 +36,26 @@ class FlangerApp(Flask):
             if isinstance(self.config['FLANGER_URLS'], list):
                 for urls in self.config['FLANGER_URLS']:
                     clz = extract_clz_from_string(urls)
+                    prefix = f'/{clz.url_prefix.strip("/")}'
                     for url, resource in clz.urls.items():
+                        url = f'{prefix}/{url.strip("/")}'
+                        # 产生allowed_methods
+                        allowed = []
+                        for method in ['get', 'post', 'put', 'delete']:
+                            if hasattr(resource, method):
+                                allowed.append(method)
+                        resource.allowed_methods = allowed
                         ep = f'{clz.__module__}.{clz.__name__}.{resource.__name__}'
                         self.add_url_rule(url, endpoint=ep, methods=['GET', 'POST', 'PUT', 'DELETE'])
                         self.endpoint_resource[ep] = resource()
+                        self.endpoint_url[ep] = url
             else:
                 raise Exception('FLANGER_URLS must be list !!!')
+
+    def init_swagger(self):
+        if 'BASE_DIR' not in self.config:
+            raise Exception('BASE_DIR must in settings !!!')
+        generate_swagger_json(self)
 
     def init_request_processors(self):
         if 'FLANGER_REQUEST_PROCESSORS' in self.config:

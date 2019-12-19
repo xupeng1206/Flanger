@@ -1,6 +1,7 @@
 from flanger.restful.exceptions import MethodNotImplement
 
-class BaseResource:
+
+class SmartResource:
 
     def get(self, *args, **kwargs):
         raise MethodNotImplement
@@ -13,6 +14,7 @@ class BaseResource:
 
     def delete(self, *args, **kwargs):
         raise MethodNotImplement
+
 
 class SwaggerResource:
 

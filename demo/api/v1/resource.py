@@ -1,7 +1,4 @@
-from flanger.restful.resource import BaseResource
+class HelloResource:
 
-
-class HelloResource(BaseResource):
-
-    def get(self, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         return {'version': 'v1'}

@@ -1,0 +1,17 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "",
+    "version": "0.0.0",
+    "title": "Flanger Swagger"
+  },
+  "host": "127.0.0.1:8000",
+  "basePath": "",
+  "tags": [
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+  }
+}

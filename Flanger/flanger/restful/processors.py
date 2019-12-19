@@ -28,7 +28,7 @@ class BaseRequestProcessor:
             if method is None:
                 raise MethodNotImplement
 
-            params = {}
+            params = {'request': request}
             ret_params = extract_params(request)
             if isinstance(ret_params, dict):
                 params.update(ret_params)
