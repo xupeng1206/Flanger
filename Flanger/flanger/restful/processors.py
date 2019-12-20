@@ -2,6 +2,8 @@ from .response import FlangerResponse
 from .exceptions import FlangerError, UrlNotFound, MethodNotImplement
 from .resource import SwaggerResource
 from .utils import extract_params
+from flask import send_file
+import os
 import logging
 
 logger = logging.getLogger(__name__)
@@ -93,5 +95,16 @@ class FlangerStaticProcessor:
     def __init__(self, app, *args, **kwargs):
         self.app = app
 
-    def process(request, *args, **kwargs):
-        print('FlangerStaticProcessor')
+    def process(self, request, *args, **kwargs):
+        import flanger
+        if request.path.strip('/') == 'favicon.ico':
+            return send_file(os.path.join(flanger.__swagger__, 'favicon-32x32.png'))
+        params = {'request': request}
+        ret_params = extract_params(request)
+        if isinstance(ret_params, dict):
+            params.update(ret_params)
+        filepath = params['filepath']
+        if filepath == 'swagger.json':
+            swagger_json_path = os.path.join(os.path.join(self.app.config['BASE_DIR'], 'static'), 'swagger.json')
+            return send_file(swagger_json_path)
+        return send_file(os.path.join(flanger.__swagger__, filepath))

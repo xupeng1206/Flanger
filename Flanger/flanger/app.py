@@ -61,12 +61,10 @@ class FlangerApp(Flask):
         self.add_url_rule('/fstatic/<filepath>', endpoint='fstatic', methods=['GET'])
 
     def init_swagger(self):
+
+        self.add_url_rule('/favicon.ico', endpoint='favicon')
         for url, resource in FlangerUrls.urls.items():
-            ep = f'Base.{resource.__name__}'
-            self.add_url_rule(url, endpoint=ep)
-            # self.endpoint_resource[ep] = resource()
-            # self.endpoint_url[ep] = url
-            # self.endpoint_inner.append(ep)
+            self.add_url_rule(url, endpoint='fswagger')
 
         self.flanger_swagger_processor = FlangerSwaggerProcessor(self)
         self.flanger_static_processor = FlangerStaticProcessor(self)
@@ -110,10 +108,10 @@ class FlangerApp(Flask):
         # flanger 自身的static
         url_rule = request.url_rule
 
-        if url_rule.endpoint.strip('/') == 'swagger':
+        if url_rule.endpoint.strip('/') == 'fswagger':
             return self.flanger_swagger_processor.process_request(request)
 
-        if url_rule.endpoint.strip('/') == 'fstatic':
+        if url_rule.endpoint.strip('/') in ['fstatic', 'favicon']:
             return self.flanger_static_processor.process(request)
 
         # 静态文件不走flanger逻辑，走flask原本的逻辑
