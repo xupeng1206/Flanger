@@ -1,9 +1,12 @@
 from flask import Flask, request
-from .restful.processors import BaseRequestProcessor
+from .restful.processors import BaseRequestProcessor, FlangerStaticProcessor, FlangerSwaggerProcessor
 from .restful.urls import FlangerUrls
 from .restful.utils import extract_clz_from_string
 from .restful.swagger import generate_swagger_json
 from flanger.db.models.base import db
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class FlangerApp(Flask):
@@ -11,6 +14,8 @@ class FlangerApp(Flask):
     endpoint_url = {}
     request_processors = []
     response_processors = []
+    flanger_static_processor = None
+    flanger_swagger_processor = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -24,19 +29,20 @@ class FlangerApp(Flask):
         self.before_request(self.bind_processor)
 
     def init_db(self):
-        db.create_all(app=self)
+        pass
+        # db.create_all(app=self)
 
     def init_urls(self):
-        for url, resource in FlangerUrls.urls.items():
-            ep = f'Base.{resource.__name__}'
-            self.add_url_rule(url, endpoint=ep)
-            self.endpoint_resource[ep] = resource()
 
         if 'FLANGER_URLS' in self.config:
             if isinstance(self.config['FLANGER_URLS'], list):
                 for urls in self.config['FLANGER_URLS']:
                     clz = extract_clz_from_string(urls)
-                    prefix = f'/{clz.url_prefix.strip("/")}'
+
+                    prefix = ''
+                    if hasattr(clz, 'url_prefix'):
+                        prefix = f'/{clz.url_prefix.strip("/")}'
+
                     for url, resource in clz.urls.items():
                         url = f'{prefix}/{url.strip("/")}'
                         # 产生allowed_methods
@@ -52,7 +58,19 @@ class FlangerApp(Flask):
             else:
                 raise Exception('FLANGER_URLS must be list !!!')
 
+        self.add_url_rule('/fstatic/<filepath>', endpoint='fstatic', methods=['GET'])
+
     def init_swagger(self):
+        for url, resource in FlangerUrls.urls.items():
+            ep = f'Base.{resource.__name__}'
+            self.add_url_rule(url, endpoint=ep)
+            # self.endpoint_resource[ep] = resource()
+            # self.endpoint_url[ep] = url
+            # self.endpoint_inner.append(ep)
+
+        self.flanger_swagger_processor = FlangerSwaggerProcessor(self)
+        self.flanger_static_processor = FlangerStaticProcessor(self)
+
         if 'BASE_DIR' not in self.config:
             raise Exception('BASE_DIR must in settings !!!')
         generate_swagger_json(self)
@@ -65,16 +83,14 @@ class FlangerApp(Flask):
                 for processor in self.config['FLANGER_REQUEST_PROCESSORS']:
                     clz = extract_clz_from_string(processor)
                     if clz in BaseRequestProcessor.__subclasses__():
-                        self.request_processors.append(clz(self.endpoint_resource))
+                        self.request_processors.append(clz(self))
                     else:
-                        clz.endpoint_resource = {}
-
-                        def __init__(self, resources, *args, **kwargs):
-                            self.endpoint_resource = resources
+                        def __init__(self, app, *args, **kwargs):
+                            self.app = app
 
                         clz.__init__ = __init__
 
-                        self.request_processors.append(clz(self.endpoint_resource))
+                        self.request_processors.append(clz(self))
 
     def init_response_processors(self):
         if 'FLANGER_RESPONSE_PROCESSORS' in self.config:
@@ -83,9 +99,27 @@ class FlangerApp(Flask):
             else:
                 for processor in self.config['FLANGER_RESPONSE_PROCESSORS']:
                     clz = extract_clz_from_string(processor)
-                    self.response_processors.append(clz)
+
+                    def __init__(self, app, *args, **kwargs):
+                        self.app = app
+
+                    clz.__init__ = __init__
+                    self.response_processors.append(clz(self))
 
     def bind_processor(self):
+        # flanger 自身的static
+        url_rule = request.url_rule
+
+        if url_rule.endpoint.strip('/') == 'swagger':
+            return self.flanger_swagger_processor.process_request(request)
+
+        if url_rule.endpoint.strip('/') == 'fstatic':
+            return self.flanger_static_processor.process(request)
+
+        # 静态文件不走flanger逻辑，走flask原本的逻辑
+        if url_rule.endpoint.strip('/') == self.static_url_path.strip('/'):
+            return
+
         for processor in self.request_processors:
             if hasattr(processor, 'process_request'):
                 response = processor.process_request(request)

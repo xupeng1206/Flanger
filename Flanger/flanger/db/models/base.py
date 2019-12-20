@@ -1,8 +1,6 @@
 from sqlalchemy import Column, Integer
 from flask_sqlalchemy import SQLAlchemy
 
-__all__ = ['db', 'BaseModel']
-
 
 db = SQLAlchemy()
 
@@ -14,5 +12,4 @@ class BaseModel(db.Model):
 
 
 class AutoApiModel(BaseModel):
-    pass
-
+    __abstract__ = True

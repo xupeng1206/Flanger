@@ -282,7 +282,7 @@ def generate_swagger_json(app):
 
         load_dict["paths"][f"{app.endpoint_url[k]}"] = cls_path_dict
 
-    web_statics_folder = os.path.join(f'{app.config["BASE_DIR"]}', 'statics')
+    web_statics_folder = os.path.join(f'{app.config["BASE_DIR"]}', 'static')
     json_file_path = os.path.join(web_statics_folder, 'swagger.json')
     if not os.path.exists(web_statics_folder):
         os.mkdir(web_statics_folder)
