@@ -53,6 +53,9 @@ class BaseRequestProcessor:
 
 class BaseResponseProcessor:
 
+    def __init__(self, app, *args, **kwargs):
+        self.app = app
+
     def process_response(self, response):
         return response
 

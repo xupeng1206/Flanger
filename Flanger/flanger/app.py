@@ -1,5 +1,6 @@
 from flask import Flask, request
-from .restful.processors import BaseRequestProcessor, FlangerStaticProcessor, FlangerSwaggerProcessor
+from .restful.processors import BaseRequestProcessor, BaseResponseProcessor, FlangerStaticProcessor, \
+    FlangerSwaggerProcessor
 from .restful.urls import FlangerUrls
 from .restful.utils import extract_clz_from_string
 from .restful.swagger import generate_swagger_json
@@ -98,11 +99,14 @@ class FlangerApp(Flask):
                 for processor in self.config['FLANGER_RESPONSE_PROCESSORS']:
                     clz = extract_clz_from_string(processor)
 
-                    def __init__(self, app, *args, **kwargs):
-                        self.app = app
+                    if clz in BaseResponseProcessor.__subclasses__():
+                        self.response_processors.append(clz(self))
+                    else:
+                        def __init__(self, app, *args, **kwargs):
+                            self.app = app
 
-                    clz.__init__ = __init__
-                    self.response_processors.append(clz(self))
+                        clz.__init__ = __init__
+                        self.response_processors.append(clz(self))
 
     def bind_processor(self):
         # flanger 自身的static
