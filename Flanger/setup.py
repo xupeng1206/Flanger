@@ -21,5 +21,8 @@ setup(
     install_requires=[
         'Flask>=1.1.1',
         'Flask-SQLAlchemy>=2.4.1',
-    ]
+    ],
+    entry_points={'console_scripts': [
+        'Flanger=flanger.cmds:cli',
+    ]},
 )
