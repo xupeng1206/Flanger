@@ -1,3 +1,10 @@
+"""
+作者         xupeng
+邮箱         874582705@qq.com
+github主页   https://github.com/xupeng1206
+
+"""
+
 from flask import Flask, request
 from .restful.processors import BaseRequestProcessor, BaseResponseProcessor, FlangerStaticProcessor, \
     FlangerSwaggerProcessor
@@ -22,16 +29,11 @@ class FlangerApp(Flask):
         super().__init__(*args, **kwargs)
 
     def init(self):
-        self.init_db()
         self.init_urls()
         self.init_swagger()
         self.init_request_processors()
         self.init_response_processors()
         self.before_request(self.bind_processor)
-
-    def init_db(self):
-        pass
-        # db.create_all(app=self)
 
     def init_urls(self):
 
@@ -59,13 +61,11 @@ class FlangerApp(Flask):
             else:
                 raise Exception('FLANGER_URLS must be list !!!')
 
-        self.add_url_rule('/fstatic/<filepath>', endpoint='fstatic', methods=['GET'])
-
     def init_swagger(self):
 
+        self.add_url_rule('/swagger', endpoint='fswagger')
+        self.add_url_rule('/fstatic/<filepath>', endpoint='fstatic', methods=['GET'])
         self.add_url_rule('/favicon.ico', endpoint='favicon')
-        for url, resource in FlangerUrls.urls.items():
-            self.add_url_rule(url, endpoint='fswagger')
 
         self.flanger_swagger_processor = FlangerSwaggerProcessor(self)
         self.flanger_static_processor = FlangerStaticProcessor(self)
@@ -109,12 +109,12 @@ class FlangerApp(Flask):
                         self.response_processors.append(clz(self))
 
     def bind_processor(self):
-        # flanger 自身的static
         url_rule = request.url_rule
 
         if url_rule.endpoint.strip('/') == 'fswagger':
             return self.flanger_swagger_processor.process_request(request)
 
+        # 处理flanger 自身的swagger的static
         if url_rule.endpoint.strip('/') in ['fstatic', 'favicon']:
             return self.flanger_static_processor.process(request)
 

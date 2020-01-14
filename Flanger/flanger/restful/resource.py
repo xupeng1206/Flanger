@@ -1,3 +1,10 @@
+"""
+作者         xupeng
+邮箱         874582705@qq.com
+github主页   https://github.com/xupeng1206
+
+"""
+
 from .exceptions import MethodNotImplement, UrlNotFound
 from flask import send_file
 import os
