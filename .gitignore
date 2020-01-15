@@ -2,6 +2,6 @@
 .vscode/
 .idea/
 */__pycache__/
-Flanger/build/
-Flange/Flanger.egg-info/
-Flanger/dist/
+./build/
+./Flanger.egg-info/
+./dist/
