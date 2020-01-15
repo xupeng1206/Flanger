@@ -6,6 +6,7 @@ github主页   https://github.com/xupeng1206
 """
 
 from flask import jsonify
+from .exceptions import FlangerError
 
 
 class FlangerResponse:
@@ -31,3 +32,10 @@ class FlangerResponse:
             'message': '',
             'data': data
         })
+
+    @staticmethod
+    def raisee(e):
+        if isinstance(e, FlangerError):
+            return FlangerResponse.error(e.code, e.msg)
+        else:
+            raise e

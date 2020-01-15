@@ -6,4 +6,3 @@ class V1Urls:
     urls = {
         '/hello': HelloResource
     }
-

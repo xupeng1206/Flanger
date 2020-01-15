@@ -105,7 +105,7 @@ class FlangerStaticProcessor:
     def __init__(self, app, *args, **kwargs):
         self.app = app
 
-    def process(self, request, *args, **kwargs):
+    def process_request(self, request, *args, **kwargs):
         import flanger
         if request.path.strip('/') == 'favicon.ico':
             return send_file(os.path.join(flanger.__swagger__, 'favicon-32x32.png'))

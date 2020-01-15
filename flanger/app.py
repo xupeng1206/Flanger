@@ -8,10 +8,10 @@ github主页   https://github.com/xupeng1206
 from flask import Flask, request
 from .restful.processors import BaseRequestProcessor, BaseResponseProcessor, FlangerStaticProcessor, \
     FlangerSwaggerProcessor
-from .restful.urls import FlangerUrls
 from .restful.utils import extract_clz_from_string
 from .restful.swagger import generate_swagger_json
-from flanger.db.models.base import db
+from .restful.exceptions import UrlNotFound
+from .restful.response import FlangerResponse
 import logging
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ class FlangerApp(Flask):
 
     def init_swagger(self):
 
-        self.add_url_rule('/swagger', endpoint='fswagger')
+        self.add_url_rule('/swagger', endpoint='swagger')
         self.add_url_rule('/fstatic/<filepath>', endpoint='fstatic', methods=['GET'])
         self.add_url_rule('/favicon.ico', endpoint='favicon')
 
@@ -110,13 +110,16 @@ class FlangerApp(Flask):
 
     def bind_processor(self):
         url_rule = request.url_rule
+        if not url_rule:
+            return FlangerResponse.raisee(UrlNotFound)
 
-        if url_rule.endpoint.strip('/') == 'fswagger':
+        # 处理访问swagger页面时
+        if url_rule.endpoint.strip('/') == 'swagger':
             return self.flanger_swagger_processor.process_request(request)
 
         # 处理flanger 自身的swagger的static
         if url_rule.endpoint.strip('/') in ['fstatic', 'favicon']:
-            return self.flanger_static_processor.process(request)
+            return self.flanger_static_processor.process_request(request)
 
         # 静态文件不走flanger逻辑，走flask原本的逻辑
         if url_rule.endpoint.strip('/') == self.static_url_path.strip('/'):
@@ -128,7 +131,8 @@ class FlangerApp(Flask):
                 if response:
                     return response
 
-        response = BaseRequestProcessor(self.endpoint_resource).process_request(request)
+        response = BaseRequestProcessor(self).process_request(request)
+
         for processor in self.response_processors:
             if hasattr(processor, 'process_response'):
                 response = processor.process_response(response)

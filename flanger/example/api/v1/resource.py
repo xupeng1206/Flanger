@@ -1,4 +1,4 @@
 class HelloResource:
 
     def get(self, request, *args, **kwargs):
-        return {'version': 'v1'}
+        return {'version': 'hello api v1 !!!'}
