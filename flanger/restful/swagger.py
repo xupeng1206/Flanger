@@ -8,6 +8,7 @@ github主页   https://github.com/xupeng1206
 import json
 import inspect
 import os
+from flanger.keywords import *
 
 
 def generate_swagger_json(app):
@@ -26,7 +27,7 @@ def generate_swagger_json(app):
     # swagger doc setting end
 
     # if hasattr(app.config, "SWAGGER_EXCLUDE_PARAMS"):
-    if "SWAGGER_IGNORE_PARAMS" in app.config:
+    if SWAGGER_IGNORE_PARAMS in app.config:
         exclude_params = ["self", "request"] + app.config['SWAGGER_IGNORE_PARAMS']
     else:
         exclude_params = ["self", "request"]

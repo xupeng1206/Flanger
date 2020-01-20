@@ -9,6 +9,7 @@ from .response import FlangerResponse
 from .exceptions import FlangerError, UrlNotFound, MethodNotImplement
 from .resource import SwaggerResource
 from .utils import extract_params
+from flanger.keywords import *
 from flask import send_file
 import os
 import logging
@@ -41,12 +42,12 @@ class BaseRequestProcessor:
             if isinstance(ret_params, dict):
                 params.update(ret_params)
 
-            if url_rule.endpoint == 'Base.SwaggerResource':
+            if url_rule.endpoint == FLANGER_SWAGGER_ENDPOINT:
                 params.update({'debug': self.app.config['DEBUG']})
 
             data = method(**params)
 
-            if url_rule.endpoint == 'Base.SwaggerResource':
+            if url_rule.endpoint == FLANGER_SWAGGER_ENDPOINT:
                 return data
 
             return FlangerResponse.success(data if not data is None else {})

@@ -50,14 +50,13 @@ def extract_clz_from_string(module_str):
 
 def guess_val(val):
     """
-        eg.
-        10.0    ==> 10
-        10.1    ==> 10.1
-        10      ==> 10
-        'abc'   ==> 'abc'
-        '10.0'  ==> 10
-        '10.1'  ==> 10.1
-        '10'    ==> 10
+        10.0    --> 10
+        10.1    --> 10.1
+        10      --> 10
+        'abc'   --> 'abc'
+        '10.0'  --> 10
+        '10.1'  --> 10.1
+        '10'    --> 10
     """
     if not isinstance(val, str) or isinstance(val, int) or isinstance(val, float):
         return val

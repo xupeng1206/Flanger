@@ -12,6 +12,7 @@ from .restful.utils import extract_clz_from_string
 from .restful.swagger import generate_swagger_json
 from .restful.exceptions import UrlNotFound
 from .restful.response import FlangerResponse
+from .keywords import *
 import logging
 
 logger = logging.getLogger(__name__)
@@ -37,13 +38,13 @@ class FlangerApp(Flask):
 
     def init_urls(self):
 
-        if 'FLANGER_URLS' in self.config:
-            if isinstance(self.config['FLANGER_URLS'], list):
-                for urls in self.config['FLANGER_URLS']:
+        if FLANGER_URLS in self.config:
+            if isinstance(self.config[FLANGER_URLS], list):
+                for urls in self.config[FLANGER_URLS]:
                     clz = extract_clz_from_string(urls)
 
                     prefix = ''
-                    if hasattr(clz, 'url_prefix'):
+                    if hasattr(clz, URL_PREFIX):
                         prefix = f'/{clz.url_prefix.strip("/")}'
 
                     for url, resource in clz.urls.items():
@@ -59,7 +60,7 @@ class FlangerApp(Flask):
                         self.endpoint_resource[ep] = resource()
                         self.endpoint_url[ep] = url
             else:
-                raise Exception('FLANGER_URLS must be list !!!')
+                raise Exception(f'{FLANGER_URLS} must be list !!!')
 
     def init_swagger(self):
 
@@ -70,16 +71,16 @@ class FlangerApp(Flask):
         self.flanger_swagger_processor = FlangerSwaggerProcessor(self)
         self.flanger_static_processor = FlangerStaticProcessor(self)
 
-        if 'BASE_DIR' not in self.config:
-            raise Exception('BASE_DIR must in settings !!!')
+        if BASE_DIR not in self.config:
+            raise Exception(f'{BASE_DIR} must in settings !!!')
         generate_swagger_json(self)
 
     def init_request_processors(self):
-        if 'FLANGER_REQUEST_PROCESSORS' in self.config:
-            if not isinstance(self.config['FLANGER_REQUEST_PROCESSORS'], list):
-                raise Exception('FLANGER_REQUEST_PROCESSORS must be list !!!')
+        if FLANGER_REQUEST_PROCESSORS in self.config:
+            if not isinstance(self.config[FLANGER_REQUEST_PROCESSORS], list):
+                raise Exception(f'{FLANGER_REQUEST_PROCESSORS} must be list !!!')
             else:
-                for processor in self.config['FLANGER_REQUEST_PROCESSORS']:
+                for processor in self.config[FLANGER_REQUEST_PROCESSORS]:
                     clz = extract_clz_from_string(processor)
                     if clz in BaseRequestProcessor.__subclasses__():
                         self.request_processors.append(clz(self))
@@ -92,11 +93,11 @@ class FlangerApp(Flask):
                         self.request_processors.append(clz(self))
 
     def init_response_processors(self):
-        if 'FLANGER_RESPONSE_PROCESSORS' in self.config:
-            if not isinstance(self.config['FLANGER_RESPONSE_PROCESSORS'], list):
-                raise Exception('FLANGER_RESPONSE_PROCESSORS must be list !!!')
+        if FLANGER_RESPONSE_PROCESSORS in self.config:
+            if not isinstance(self.config[FLANGER_RESPONSE_PROCESSORS], list):
+                raise Exception(f'{FLANGER_RESPONSE_PROCESSORS} must be list !!!')
             else:
-                for processor in self.config['FLANGER_RESPONSE_PROCESSORS']:
+                for processor in self.config[FLANGER_RESPONSE_PROCESSORS]:
                     clz = extract_clz_from_string(processor)
 
                     if clz in BaseResponseProcessor.__subclasses__():
