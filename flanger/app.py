@@ -45,7 +45,8 @@ class FlangerApp(Flask):
 
                     prefix = ''
                     if hasattr(clz, URL_PREFIX):
-                        prefix = f'/{clz.url_prefix.strip("/")}'
+                        url_prefix = getattr(clz, URL_PREFIX)
+                        prefix = f'/{url_prefix.strip("/")}'
 
                     for url, resource in clz.urls.items():
                         url = f'{prefix}/{url.strip("/")}'
