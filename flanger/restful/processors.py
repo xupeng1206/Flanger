@@ -123,7 +123,7 @@ class BaseResponseProcessor:
 
 class FlangerSwaggerProcessor:
     """
-    专门用来处理swagger相关的processor
+    专门用来处理swagger相关的processor，返回swagger_index.html
 
     开发人员想要访问swagger的时候，请求会走到这里，然后去找到swagger对应的resource中的get方法并执行
     这里swagger的resource和普通的resource有点不一样，这里swagger resource中的get方法返回是一个httpresponse, 而不是字典或list
@@ -183,18 +183,44 @@ class FlangerSwaggerProcessor:
 
 
 class FlangerStaticProcessor:
+    """
+    专门用处理swagger(swagger_index.html)页面需要的一些静态文件的processor
+
+    1.swagger页面的用到的其他静态文件path都是fstatic开头的(swagger官网下下来的是static打头，我为了区别常app中可能的static, 改成了fstatic)
+    2.还有一个常有的favicon.ico找不到的问题，改用favicon-32x32.png
+
+    self.app: 就是flanger的核心对象(flask核心对象+flanger自己的一些东西)
+
+    process_request: 请求处理的逻辑部分
+    """
 
     def __init__(self, app, *args, **kwargs):
+        """
+
+        :param app:  就是flanger的核心对象(flask核心对象+flanger自己的一些东西)
+        :param args:
+        :param kwargs:
+        """
         self.app = app
 
     def process_request(self, request, *args, **kwargs):
+        """
+
+        :param request:
+        :param args:
+        :param kwargs:
+        :return: http response
+        """
         import flanger
         if request.path.strip('/') == 'favicon.ico':
             return send_file(os.path.join(flanger.__swagger__, 'favicon-32x32.png'))
+
         params = {'request': request}
         ret_params = extract_params(request)
         if isinstance(ret_params, dict):
             params.update(ret_params)
+
+        # 获取具体静态文件的相对路径，从swagger文件夹中找到并返回就行了
         filepath = params['filepath']
         if filepath == 'swagger.json':
             swagger_json_path = os.path.join(os.path.join(self.app.config['BASE_DIR'], 'static'), 'swagger.json')
