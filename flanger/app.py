@@ -63,7 +63,6 @@ class FlangerApp(Flask):
                 raise Exception(f'{FLANGER_URLS} must be list !!!')
 
     def init_swagger(self):
-
         self.add_url_rule('/swagger', endpoint='swagger')
         self.add_url_rule('/fstatic/<filepath>', endpoint='fstatic', methods=['GET'])
         self.add_url_rule('/favicon.ico', endpoint='favicon')

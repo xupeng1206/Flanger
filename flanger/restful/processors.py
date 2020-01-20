@@ -18,43 +18,60 @@ logger = logging.getLogger(__name__)
 
 
 class BaseRequestProcessor:
+    """
+    BaseRequestProcessor: 框架层面的请求处理模块。
+
+    用于处于请求，在这里它会请求的信息，找到对应的resource中的对应的方法，
+    并将对应方法返回的dict和list处理成一个json-response返回出去
+
+    self.app: 就是flanger的核心对象(flask核心对象+flanger自己的一些东西)
+
+    process_request: 请求处理的逻辑部分
+    """
 
     def __init__(self, app, *args, **kwargs):
         self.app = app
 
     def process_request(self, request, *args, **kwargs):
         try:
+            # 获取url规则
             url_rule = request.url_rule
             if not url_rule:
+                # url_rule为空的话, 证明path配置失败
                 raise UrlNotFound
 
+            # 通过url_rule获取对应endpoint,在用endpoint去endpoint_resource里面找对应的resource
             resource = self.app.endpoint_resource[url_rule.endpoint] if url_rule.endpoint in self.app.endpoint_resource else None
             if resource is None:
                 raise UrlNotFound
 
+            # 获取方法名（get? post? put? delete?）
             request_method = request.method.lower()
             method = getattr(resource, request_method, None)
             if method is None:
                 raise MethodNotImplement
 
+            # 将request也当成参数给到resource里面具体的算法
             params = {'request': request}
+            # 抽取request中的一些参数，包括url传参，body传参等等
             ret_params = extract_params(request)
             if isinstance(ret_params, dict):
+                # 更新params
                 params.update(ret_params)
 
-            if url_rule.endpoint == FLANGER_SWAGGER_ENDPOINT:
-                params.update({'debug': self.app.config['DEBUG']})
-
+            # 执行相应方法的逻辑
             data = method(**params)
 
-            if url_rule.endpoint == FLANGER_SWAGGER_ENDPOINT:
-                return data
-
+            # 成功 处理成json-response
             return FlangerResponse.success(data if not data is None else {})
 
         except FlangerError as e:
+            # 自定义错误类型处理
             logger.error(e.msg)
-            return FlangerResponse.error(e.code, e.msg)
+            if self.app.config['DEBUG']:
+                return FlangerResponse.error(e.code, e.msg)
+            else:
+                return FlangerResponse.error(e.code)
         except Exception as e:
             raise e
 

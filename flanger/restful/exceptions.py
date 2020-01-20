@@ -19,7 +19,7 @@ class FlangerError(Exception):
 
 class UrlNotFound(FlangerError):
     """
-
+    url配置失败，url找不到的错误
     """
     code = 1001
     msg = 'Url Not Found !!!'
@@ -27,7 +27,7 @@ class UrlNotFound(FlangerError):
 
 class MethodNotImplement(FlangerError):
     """
-
+    方法没有实现的错误
     """
     code = 1002
     msg = 'Api Not Implement !!!'

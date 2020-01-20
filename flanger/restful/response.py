@@ -35,7 +35,7 @@ class FlangerResponse:
 
     @staticmethod
     def raisee(e):
-        if isinstance(e, FlangerError):
+        if isinstance(e(), FlangerError):
             return FlangerResponse.error(e.code, e.msg)
         else:
             raise e
