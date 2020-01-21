@@ -17,6 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 def lock(func):
+    """
+    线程锁的装饰器
+    :param func:
+    :return:
+    """
     func.__lock__ = threading.Lock()
 
     def wrapper(*args, **kwargs):
@@ -27,6 +32,11 @@ def lock(func):
 
 
 def Singleton(cls):
+    """
+    线程安全的单例装饰器
+    :param cls:
+    :return:
+    """
     __instances = {}
 
     @lock
@@ -39,6 +49,12 @@ def Singleton(cls):
 
 
 def extract_clz_from_string(module_str):
+    """
+    从字符串模块名中抽出对应的python对象
+
+    :param module_str:  例如  ‘example.api.v1.urls.V1Urls’
+    :return:  class     例如   V1Urls （python对象）
+    """
     file_module_str = '.'.join(module_str.split('.')[:-1])
     clz_str = module_str.split('.')[-1]
     module = importlib.import_module(file_module_str)
@@ -50,13 +66,20 @@ def extract_clz_from_string(module_str):
 
 def guess_val(val):
     """
-        10.0    --> 10
-        10.1    --> 10.1
-        10      --> 10
-        'abc'   --> 'abc'
-        '10.0'  --> 10
-        '10.1'  --> 10.1
-        '10'    --> 10
+    标准话value值，参考下面例子
+    :param val:
+    :return:  val (formated)
+
+    ex：
+
+    666.0   -->  666
+    66.6    -->  66.6
+    666     -->  666
+    'xxx'   -->  'xxx'
+    '666.0' -->  666
+    '66.1'  -->  66.6
+    '60'    -->  60
+
     """
     if not isinstance(val, str) or isinstance(val, int) or isinstance(val, float):
         return val
@@ -79,18 +102,28 @@ def guess_val(val):
 
 
 def extract_params(request):
+    """
+    解析request, 抽出当中的参数，并将他们组织成dict
+    注意多种参数类型之间会有覆盖，开发时请注意
+    在resource中想要原始的各部分的原值，仍然可以从request中获得
+
+    :param request:
+    :return: {}
+    """
     params = {}
-    # params in re style in url like  /hello/<name>  name: xxx
+    # 1. params in re style in url like  /hello/<name>  name: xxx
     if request.view_args:
         for k, v in request.view_args.items():
             params[k.lower()] = guess_val(v)
 
-    # params at the right of the question mark  /hello/<name>?abc=123  abc: 123
+    # 2. params at the right of the question mark  /hello/<name>?abc=123  abc: 123
     if request.args:
         for k, v in request.args.items():
             params[k.lower()] = guess_val(v)
 
-    # data
+    # request.json 只能够接受方法为POST、Body为raw，raw类型为json 即header内容为application/json的数据
+    # request.dada 能够同时接受方法为POST、Body为raw, raw类型为text或json的数据
+    # 3. data
     if request.data:
         try:
             data_str = str(request.data, encoding='utf-8').replace('\n', '').replace('\r', '').replace('\t', '')
@@ -103,16 +136,17 @@ def extract_params(request):
         except Exception as e:
             logger.debug(traceback.format_exc())
 
+    # 4. json
     if request.json:
         for k, v in request.json.items():
             params[k.lower()] = guess_val(v)
 
-    # form-data
+    # 5. form-data
     if request.form:
         for k, v in request.form.items():
             params[k.lower()] = guess_val(v)
 
-    # files
+    # 6. files
     if request.files:
         for k, v in request.form.items():
             params[k.lower()] = guess_val(v)

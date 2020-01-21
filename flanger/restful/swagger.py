@@ -12,6 +12,15 @@ from flanger.keywords import *
 
 
 def generate_swagger_json(app):
+    """
+    根据resource的具体情况，自动生成对应的swagger.json文件
+    swagger原理；  实际上swagger_index.html的渲染完全由swagger.json决定，只要根据缩写的具体api来生成swagger.json
+    就能自动的获得swagger文档，通过学习swagger.json内数据结果代表意义，配合python的自省就能得到对应的swagger.json
+    这一函数就是做了这个事情
+    
+    :param app:  flanger核心对象
+    :return:
+    """
     flanger_path = os.path.dirname(os.path.dirname(__file__))
     swagger_ori_path = os.path.join(os.path.join(flanger_path, 'swagger'), 'swagger_ori.json')
 
@@ -228,4 +237,3 @@ def generate_swagger_json(app):
         os.mkdir(web_statics_folder)
     with open(json_file_path, 'w+') as dump_f:
         json.dump(load_dict, dump_f)
-
