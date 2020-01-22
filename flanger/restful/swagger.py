@@ -40,6 +40,7 @@ def generate_swagger_json(app):
         exclude_params = ["self", "request"] + app.config['SWAGGER_IGNORE_PARAMS']
     else:
         exclude_params = ["self", "request"]
+    exclude_params = list(set(exclude_params))
 
     # generate json for swagger
     for k, v in app.endpoint_resource.items():  # app.endpoint_resource 里面有全部注册的resource
@@ -51,8 +52,9 @@ def generate_swagger_json(app):
             tag_description = ''
 
         load_dict["tags"].append({
-            "name": app.endpoint_url[k],        # 用url做这个resource的名字 更直观一点
-            "description": tag_description      # 用resource的__doc__做描述 写resource的时候  可以简要概述 这个resource是做啥用的
+            "name": app.endpoint_url[k],         # 用url做这个resource的名字 更直观一点
+            "description": tag_description,      # 用resource的__doc__做描述 写resource的时候  可以简要概述 这个resource是做啥用的
+            "externalDocs": {'description': k}   # 这里用endpoint作为分类行右侧小说明
         })
 
         # GET 方法

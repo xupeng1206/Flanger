@@ -10,7 +10,7 @@ from .exceptions import FlangerError, UrlNotFound, MethodNotImplement
 from .resource import SwaggerResource
 from .utils import extract_params
 from flanger.keywords import *
-from flask import send_file
+from flask import send_file, send_from_directory
 import os
 import logging
 
@@ -171,7 +171,7 @@ class FlangerSwaggerProcessor:
             if isinstance(ret_params, dict):
                 params.update(ret_params)
 
-            # 执行SwaggerResource的get方法，内部是个send_file，会得到一个http response，拿到后直接return
+            # 执行SwaggerResource的get方法，内部是个send_file or send_from_directory ，会得到一个http response，拿到后直接return
             data = method(**params)
             return data
 
@@ -213,7 +213,7 @@ class FlangerStaticProcessor:
         """
         import flanger
         if request.path.strip('/') == 'favicon.ico':
-            return send_file(os.path.join(flanger.__swagger__, 'favicon-32x32.png'))
+            return send_from_directory(directory=flanger.__swagger__, filename='favicon-32x32.png')
 
         params = {'request': request}
         ret_params = extract_params(request)
@@ -223,6 +223,7 @@ class FlangerStaticProcessor:
         # 获取具体静态文件的相对路径，从swagger文件夹中找到并返回就行了
         filepath = params['filepath']
         if filepath == 'swagger.json':
-            swagger_json_path = os.path.join(os.path.join(self.app.config['BASE_DIR'], 'static'), 'swagger.json')
-            return send_file(swagger_json_path)
-        return send_file(os.path.join(flanger.__swagger__, filepath))
+            swagger_json_dir = os.path.join(self.app.config['BASE_DIR'], 'static')
+            # cache_timeout=0, 让浏览器不缓存， 其他swagger相关静态文件可以缓存，因为不会经常改变
+            return send_from_directory(directory=swagger_json_dir, filename='swagger.json', cache_timeout=0)
+        return send_from_directory(directory=flanger.__swagger__, filename=filepath)
