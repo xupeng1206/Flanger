@@ -1,6 +1,6 @@
 """
 作者         xupeng
-邮箱         874582705@qq.com
+邮箱         874582705@qq.com / 15601598009@163.com
 github主页   https://github.com/xupeng1206
 
 """
@@ -17,7 +17,7 @@ def generate_swagger_json(app):
     swagger原理；  实际上swagger_index.html的渲染完全由swagger.json决定，只要根据缩写的具体api来生成swagger.json
     就能自动的获得swagger文档，通过学习swagger.json内数据结果代表意义，配合python的自省就能得到对应的swagger.json
     这一函数就是做了这个事情
-    
+
     :param app:  flanger核心对象
     :return:
     """
@@ -42,22 +42,25 @@ def generate_swagger_json(app):
         exclude_params = ["self", "request"]
 
     # generate json for swagger
-    for k, v in app.endpoint_resource.items():
+    for k, v in app.endpoint_resource.items():  # app.endpoint_resource 里面有全部注册的resource
         cls_path_dict = dict()
 
         if v.__doc__:
             tag_description = v.__doc__
         else:
             tag_description = ''
+
         load_dict["tags"].append({
-            "name": app.endpoint_url[k],
-            "description": tag_description
+            "name": app.endpoint_url[k],        # 用url做这个resource的名字 更直观一点
+            "description": tag_description      # 用resource的__doc__做描述 写resource的时候  可以简要概述 这个resource是做啥用的
         })
+
+        # GET 方法
         if "get" in v.allowed_methods:
             cls_path_dict["get"] = {}
             cls_path_dict["get"]["tags"] = [app.endpoint_url[k]]
             cls_path_dict["get"]["summary"] = f"{app.endpoint_url[k]} get method"
-            cls_path_dict["get"]["description"] = v.get.__doc__
+            cls_path_dict["get"]["description"] = v.get.__doc__   # method的doc string 作为描述， 可以将方法使用，参数说明在这里体现
             cls_path_dict["get"]["parameters"] = []
             get_params_in_code = inspect.getfullargspec(v.get).args
             get_params = [x for x in get_params_in_code if x not in exclude_params]
@@ -84,6 +87,7 @@ def generate_swagger_json(app):
 
             cls_path_dict["get"]["responses"] = {}
 
+        # POST 方法
         if "post" in v.allowed_methods:
             cls_path_dict["post"] = {}
             cls_path_dict["post"]["tags"] = [app.endpoint_url[k]]
@@ -141,6 +145,7 @@ def generate_swagger_json(app):
 
             cls_path_dict["post"]["responses"] = {}
 
+        # PUT 方法
         if "put" in v.allowed_methods:
             cls_path_dict["put"] = {}
             cls_path_dict["put"]["tags"] = [app.endpoint_url[k]]
@@ -198,6 +203,7 @@ def generate_swagger_json(app):
 
             cls_path_dict["put"]["responses"] = {}
 
+        # DELETE 方法
         if "delete" in v.allowed_methods:
             cls_path_dict["delete"] = {}
             cls_path_dict["delete"]["tags"] = [app.endpoint_url[k]]
@@ -231,8 +237,10 @@ def generate_swagger_json(app):
 
         load_dict["paths"][f"{app.endpoint_url[k]}"] = cls_path_dict
 
+    # 找到app 所在的目录 将新的json文件写在app项目目录下比较合适
     web_statics_folder = os.path.join(f'{app.config["BASE_DIR"]}', 'static')
     json_file_path = os.path.join(web_statics_folder, 'swagger.json')
+
     if not os.path.exists(web_statics_folder):
         os.mkdir(web_statics_folder)
     with open(json_file_path, 'w+') as dump_f:

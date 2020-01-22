@@ -1,6 +1,6 @@
 """
 作者         xupeng
-邮箱         874582705@qq.com
+邮箱         874582705@qq.com / 15601598009@163.com
 github主页   https://github.com/xupeng1206
 
 """
@@ -17,6 +17,7 @@ class AppGroup(click.Group):
 cli = AppGroup()
 
 
+# 提供穿件实例app的命令
 @click.command('create_project', short_help="Create a example web app !")
 @click.argument('name', default='example')
 def create_project(name):
