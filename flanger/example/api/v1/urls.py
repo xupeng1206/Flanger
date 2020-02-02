@@ -23,7 +23,7 @@ class V1Urls:
         注：    这写url和resource对应关系时候，不用关心method和endpoint, 交由框架去处理
 
     重点：
-        要想这个类有小，一定要在settings的FLANGER_URLS中注册
+        要想这个类有效，一定要在settings的FLANGER_URLS中注册
     """
 
     # url_prefix 属性可以没有
