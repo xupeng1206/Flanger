@@ -14,7 +14,7 @@ BASE_DIR = os.path.dirname(__file__)
 # URL配置
 # 使用列表中的指定的类注册路由
 FLANGER_URLS = [
-    'api.v1.urls.V1Urls',
+    # 'api.v1.urls.V1Urls',
     # 'api.v2.urls.V2Urls', ex
 ]
 
@@ -32,3 +32,5 @@ FLANGER_URLS = [
 # sagger相关
 # 自动swagger需要忽略的参数列表，比如token之类的
 # SWAGGER_IGNORE_PARAMS = []
+
+SQLALCHEMY_DATABASE_URI = "sqlite:///./project.db"

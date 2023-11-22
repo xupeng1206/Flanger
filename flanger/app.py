@@ -12,6 +12,8 @@ from .restful.utils import extract_clz_from_string
 from .restful.swagger import generate_swagger_json
 from .restful.exceptions import UrlNotFound
 from .restful.response import FlangerResponse
+from .restful.resource import SmartResource
+from .db.mixin import AutoApiModelMixin
 from .keywords import *
 import logging
 
@@ -49,6 +51,8 @@ class FlangerApp(Flask):
         """
         # 根据setting中urls配置，注册url及关联相对应resource
         self.init_urls()
+
+        self.init_auto_api()
 
         # init_urls后初始化swagger相关的内容，包括swagger的url, swagger静态资源的绑定
         self.init_swagger()
@@ -98,6 +102,29 @@ class FlangerApp(Flask):
                         self.endpoint_url[ep] = url
             else:
                 raise Exception(f'{FLANGER_URLS} must be list !!!')
+
+    def init_auto_api(self):
+        for clz in AutoApiModelMixin.__subclasses__():
+            auto_api_resource = SmartResource(clz)
+
+            allowed_methods = []
+            path = f"{clz.__module__}_{clz.__name__}"
+            clz_meta = getattr(clz, "Meta", None)
+            if clz_meta:
+                allowed_methods = getattr(clz_meta, "allowed_methods", [])
+                path = getattr(clz_meta, "api_url", path).strip("/")
+
+            for method in allowed_methods:
+                method_lower = method.lower()
+                setattr(auto_api_resource, method_lower, getattr(auto_api_resource, f"_{method_lower}", None))
+
+            auto_api_resource.allowed_methods = allowed_methods
+
+            url = f"/api/auto/{path}"
+            ep = f"auto_api.{clz.__module__}.{clz.__name__}"
+            self.add_url_rule(url, endpoint=ep, methods=['GET', 'POST', 'PUT', 'DELETE'])
+            self.endpoint_resource[ep] = auto_api_resource
+            self.endpoint_url[ep] = url
 
     def init_swagger(self):
         """

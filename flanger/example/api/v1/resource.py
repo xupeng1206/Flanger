@@ -22,7 +22,7 @@ class HelloResource:
         :return:
         """
         # 你可以在这里写这个接口的具体逻辑，最后返回一个dict或一个list即可
-        return {'data': 'hello api v1 method GET !!!'}
+        return {'data': f'hello api v1 method GET !!!'}
 
     def post(self, request, *args, **kwargs):
         """

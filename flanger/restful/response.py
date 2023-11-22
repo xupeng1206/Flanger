@@ -37,13 +37,13 @@ class FlangerResponse:
         :param data:  返回的数据
         :return: json-response
         """
-        if not isinstance(data, dict) or isinstance(data, list):
+        if not (isinstance(data, dict) or isinstance(data, list)):
             raise TypeError(f'Reources Return Must Be Dict Or List !!!')
 
         return jsonify({
             'success': True,
             'code': 200,
-            'message': '',
+            'message': 'ok',
             'data': data
         })
 

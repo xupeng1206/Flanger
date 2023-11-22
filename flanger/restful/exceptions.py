@@ -32,3 +32,7 @@ class MethodNotImplement(FlangerError):
     code = 1002
     msg = 'Api Not Implement !!!'
 
+
+class SQLError(FlangerError):
+    code = 1003
+    msg = 'SQL Failed !!!'

@@ -8,6 +8,7 @@ github主页   https://github.com/xupeng1206
 import json
 import inspect
 import os
+from flanger.db.mixin import AutoApiModelMixin
 from flanger.keywords import *
 
 
@@ -65,6 +66,8 @@ def generate_swagger_json(app):
             cls_path_dict["get"]["description"] = v.get.__doc__   # method的doc string 作为描述， 可以将方法使用，参数说明在这里体现
             cls_path_dict["get"]["parameters"] = []
             get_params_in_code = inspect.getfullargspec(v.get).args
+            if getattr(v, 'model', None) in AutoApiModelMixin.__subclasses__():
+                get_params_in_code.extend([x.name for x in getattr(v, "model").__table__.columns if x.name not in ["id", "create_at", "update_at"]])
             get_params = [x for x in get_params_in_code if x not in exclude_params]
             annotations = v.get.__annotations__
             defaults = v.get.__defaults__
@@ -97,6 +100,8 @@ def generate_swagger_json(app):
             cls_path_dict["post"]["description"] = v.post.__doc__
             cls_path_dict["post"]["parameters"] = []
             post_params_in_code = inspect.getfullargspec(v.post).args
+            if getattr(v, 'model', None) in AutoApiModelMixin.__subclasses__():
+                post_params_in_code.extend([x.name for x in getattr(v, "model").__table__.columns if x.name not in ["id", "create_at", "update_at"]])
             post_params = [x for x in post_params_in_code if x not in exclude_params]
             annotations = v.post.__annotations__
 
@@ -155,6 +160,8 @@ def generate_swagger_json(app):
             cls_path_dict["put"]["description"] = v.put.__doc__
             cls_path_dict["put"]["parameters"] = []
             put_params_in_code = inspect.getfullargspec(v.put).args
+            if getattr(v, 'model', None) in AutoApiModelMixin.__subclasses__():
+                put_params_in_code.extend([x.name for x in getattr(v, "model").__table__.columns if x.name not in ["id", "create_at", "update_at"]])
             put_params = [x for x in put_params_in_code if x not in exclude_params]
             annotations = v.put.__annotations__
 
@@ -213,7 +220,7 @@ def generate_swagger_json(app):
             cls_path_dict["delete"]["description"] = v.delete.__doc__
             cls_path_dict["delete"]["parameters"] = []
             delete_params_in_code = inspect.getfullargspec(v.delete).args
-            delete_params = [x for x in delete_params_in_code if x not in delete_params_in_code]
+            delete_params = [x for x in delete_params_in_code if x not in exclude_params]
             annotations = v.delete.__annotations__
             defaults = v.delete.__defaults__
             # 这里需要考虑参数annotations和defaults个数不匹配

@@ -5,7 +5,7 @@ github主页   https://github.com/xupeng1206
 
 """
 
-from setuptools import  setup, find_packages
+from setuptools import setup, find_packages
 
 setup(
     name='Flanger',
