@@ -14,7 +14,7 @@ BASE_DIR = os.path.dirname(__file__)
 # URL配置
 # 使用列表中的指定的类注册路由
 FLANGER_URLS = [
-    # 'api.v1.urls.V1Urls',
+    'api.v1.urls.V1Urls',
     # 'api.v2.urls.V2Urls', ex
 ]
 
